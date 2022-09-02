@@ -1,0 +1,53 @@
+<?php
+
+	require_once "Db.php";
+
+	$Db = new DBMySQl();
+	$Db->connect = $Db->connect();
+
+	if(strlen($_GET["serch"]) >= 3)
+	{
+		$get_com = "SELECT * FROM `comments` WHERE `body` LIKE '%".$_GET["serch"]."%' LIMIT 0, 500";
+		$res_com = $Db->select($get_com);
+		$table_com  = is_object($res_com) ? $Db->assoc($res_com) : $res_com;
+		unset($_GET["serch"]);
+	}elseif(strlen($_GET["serch"]) === 0) echo "<br>";
+    else echo "введите больше символов для поиска!";
+?>
+<html>
+	<head>
+		<meta charset="utf-8">
+	</head>
+    <body>
+	    <div>
+			<form method='GET' enctype="multipart/form-data">
+				<br><input type='text' name='serch' placeholder=''/><br>
+				<br><input type='submit' value='Поиск'/>
+			</form>
+			<table border="1">
+				<tr>
+					<th>Post title</th>
+					<th>Coment name</th>
+					<th>Coment body</th>
+				</tr>
+				<?php
+					if(is_array($table_com))
+					{
+						foreach ($table_com as $key => $value)
+						{
+							if($value["postId"] !== $table_post[0]["id"])
+							{
+								$get_post = "SELECT `id`, `title` FROM `posts` WHERE `id` LIKE '".$value["postId"]."' LIMIT 0, 500";
+								$res_post= $Db->select($get_post);
+								$table_post = is_object($res_post) ? $Db->assoc($res_post) : $res_post;
+							}
+							echo "<tr><td>" . (($table_post[0]["title"] !== $title) ? $table_post[0]["title"]  : "" )."</td><td>";
+							echo $value["name"] . "</td><td>" . $value["body"] . "</td></tr>";
+							$title = $table_post[0]["title"];
+						}
+					}
+				?>
+			</table>
+        </div>
+    </body>
+</html>
